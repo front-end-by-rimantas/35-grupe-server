@@ -35,6 +35,7 @@ function pageRegister(data) {
                 </header>
                 <main>
                     <form>
+                        <div class="notifications"></div>
                         <div>
                             <label>Email</label>
                             <input type="text">

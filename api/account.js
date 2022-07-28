@@ -1,3 +1,5 @@
+import { IsValid } from "../lib/IsValid.js";
+
 const handler = {};
 
 handler.account = async (data, callback) => {
@@ -17,8 +19,28 @@ handler._innerMethods = {};
 // POST
 handler._innerMethods.post = async (data, callback) => {
     const { payload } = data;
+    const [payloadErr, payloadContent] = payload;
+    if (payloadErr) {
+        return callback(400, {
+            msg: 'Serveris gavo duomenis netinkamu formatu',
+        })
+    }
 
-    console.log(payload);
+    // 1) Patikrinti, ar atejusi informacija yra tinkama
+
+    const { email, pass } = payloadContent;
+
+    const [emailErr, emailMsg] = IsValid.email(email);
+    if (emailErr) {
+        return callback(200, {
+            msg: emailMsg,
+        })
+    }
+
+    // 2) Patikrinti, ar toks vartotojas nera uzregistruotas
+
+    // 3) Uzregistruoti vartotoja
+    // - slaptazodzio hash'inimas
 
     return callback(200, {
         msg: 'Vartotojo paskyra sukurta sekmingai',

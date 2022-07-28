@@ -1,0 +1,28 @@
+main {
+    padding: 60px;
+}
+
+form {
+    display: grid;
+    gap: 20px;
+    width: 100%;
+    max-width: 300px;
+    box-shadow: 0 4px 8px #0003;
+    padding: 20px;
+    border-radius: 10px;
+}
+form > div {
+    display: grid;
+    gap: 5px;
+}
+form > div > label {
+    text-transform: uppercase;
+}
+form > div > input {
+    font-size: 20px;
+    padding: 5px;
+}
+form > div > button {
+    font-size: 20px;
+    padding: 5px;
+}

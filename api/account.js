@@ -68,6 +68,7 @@ handler._innerMethods.post = async (data, callback) => {
         hashedPassword: hashMsg,
         registerDate: Date.now(),
         luckyNumber: null,
+        isDeleted: false,
         // emailConfirmationDate: null,
         // lastLoginDate: null,
         // orderIDs: [],
@@ -112,6 +113,12 @@ handler._innerMethods.get = async (data, callback) => {
         })
     }
 
+    if (parseMsg.isDeleted) {
+        return callback(400, {
+            msg: 'Vartotojas su tokiu email nerastas',
+        })
+    }
+
     delete parseMsg.hashedPassword;
 
     return callback(200, {
@@ -150,6 +157,12 @@ handler._innerMethods.put = async (data, callback) => {
     if (parseErr) {
         return callback(500, {
             msg: 'Nepavyko rasti vartotojo informacijos del vidines serverio klaidos',
+        })
+    }
+
+    if (userObj.isDeleted) {
+        return callback(400, {
+            msg: 'Vartotojas su tokiu email nerastas',
         })
     }
 
@@ -215,6 +228,46 @@ handler._innerMethods.put = async (data, callback) => {
 
 // DELETE
 handler._innerMethods.delete = async (data, callback) => {
+    const { trimmedPath } = data;
+    const email = trimmedPath.split('/')[2];
+
+    const [emailErr] = IsValid.email(email);
+    if (emailErr) {
+        return callback(400, {
+            msg: 'Neteisingai nurodytas email adresas',
+        })
+    }
+
+    const [readErr, readMsg] = await file.read('accounts', email + '.json');
+    if (readErr) {
+        return callback(400, {
+            msg: 'Vartotojas su tokiu email nerastas',
+        })
+    }
+
+    const [parseErr, parseMsg] = utils.parseJSONtoObject(readMsg);
+    if (parseErr) {
+        return callback(500, {
+            msg: 'Nepavyko istrinti vartotojo del vidines sistemos klaidos',
+        })
+    }
+
+    if (parseMsg.isDeleted) {
+        return callback(400, {
+            msg: 'Vartotojas su tokiu email nerastas',
+        })
+    }
+
+    parseMsg.isDeleted = true;
+    delete parseMsg.hashedPassword;
+
+    const [updateErr] = await file.update('accounts', email + '.json', parseMsg);
+    if (updateErr) {
+        return callback(500, {
+            msg: 'Nepavyko istrinti vartotojo del vidines sistemos klaidos',
+        })
+    }
+
     return callback(200, {
         msg: 'Paskyra istrinta sekmingai',
     })

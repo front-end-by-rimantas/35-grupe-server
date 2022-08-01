@@ -86,8 +86,35 @@ handler._innerMethods.post = async (data, callback) => {
 
 // GET
 handler._innerMethods.get = async (data, callback) => {
+    const { trimmedPath } = data;
+
+    const email = trimmedPath.split('/')[2];
+
+    const [emailErr, emailMsg] = IsValid.email(email);
+    if (emailErr) {
+        return callback(200, {
+            msg: emailMsg,
+        })
+    }
+
+    const [readErr, readMsg] = await file.read('accounts', email + '.json');
+    if (readErr) {
+        return callback(400, {
+            msg: 'Vartotojas su tokiu email nerastas',
+        })
+    }
+
+    const [parseErr, parseMsg] = utils.parseJSONtoObject(readMsg);
+    if (parseErr) {
+        return callback(500, {
+            msg: 'Nepavyko rasti vartotojo informacijos del vidines serverio klaidos',
+        })
+    }
+
+    delete parseMsg.hashedPassword;
+
     return callback(200, {
-        msg: 'Vartotojo paskyros informacija',
+        msg: parseMsg,
     })
 }
 

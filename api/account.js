@@ -1,4 +1,6 @@
+import { file } from "../lib/file.js";
 import { IsValid } from "../lib/IsValid.js";
+import { utils } from "../lib/utils.js";
 
 const handler = {};
 
@@ -37,10 +39,45 @@ handler._innerMethods.post = async (data, callback) => {
         })
     }
 
+    const [passErr, passMsg] = IsValid.password(pass);
+    if (passErr) {
+        return callback(200, {
+            msg: passMsg,
+        })
+    }
+
     // 2) Patikrinti, ar toks vartotojas nera uzregistruotas
+    const [readErr, readMsg] = await file.read('accounts', email + '.json');
+    if (!readErr) {
+        return callback(400, {
+            msg: 'Toks vartotojas jau uzregistruotas',
+        })
+    }
 
     // 3) Uzregistruoti vartotoja
     // - slaptazodzio hash'inimas
+    const [hashErr, hashMsg] = utils.hash(pass);
+    if (hashErr) {
+        return callback(500, {
+            msg: 'Nepavyko sukurti vartotojo paskyros del vidines serverio klaidos',
+        })
+    }
+
+    const userData = {
+        email,
+        hashedPassword: hashMsg,
+        registerDate: Date.now(),
+        // emailConfirmationDate: null,
+        // lastLoginDate: null,
+        // orderIDs: [],
+    }
+
+    const [createErr, createMsg] = await file.create('accounts', email + '.json', userData);
+    if (createErr) {
+        return callback(500, {
+            msg: 'Nepavyko uzregistruoti vartotojo del vidines serverio klaidos',
+        })
+    }
 
     return callback(200, {
         msg: 'Vartotojo paskyra sukurta sekmingai',

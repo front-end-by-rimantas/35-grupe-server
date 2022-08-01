@@ -67,6 +67,7 @@ handler._innerMethods.post = async (data, callback) => {
         email,
         hashedPassword: hashMsg,
         registerDate: Date.now(),
+        luckyNumber: null,
         // emailConfirmationDate: null,
         // lastLoginDate: null,
         // orderIDs: [],
@@ -120,6 +121,93 @@ handler._innerMethods.get = async (data, callback) => {
 
 // PUT
 handler._innerMethods.put = async (data, callback) => {
+    const { trimmedPath, payload } = data;
+
+    const email = trimmedPath.split('/')[2];
+
+    const [emailErr, emailMsg] = IsValid.email(email);
+    if (emailErr) {
+        return callback(200, {
+            msg: emailMsg,
+        })
+    }
+
+    const [payloadErr, payloadContent] = payload;
+    if (payloadErr) {
+        return callback(400, {
+            msg: 'Serveris gavo duomenis netinkamu formatu',
+        })
+    }
+
+    const [readErr, userJSONData] = await file.read('accounts', email + '.json');
+    if (readErr) {
+        return callback(400, {
+            msg: 'Vartotojas su tokiu email nerastas',
+        })
+    }
+
+    const [parseErr, userObj] = utils.parseJSONtoObject(userJSONData);
+    if (parseErr) {
+        return callback(500, {
+            msg: 'Nepavyko rasti vartotojo informacijos del vidines serverio klaidos',
+        })
+    }
+
+    const payloadKeys = Object.keys(payloadContent);
+
+    if (payloadKeys.length === 0) {
+        return callback(400, {
+            msg: 'Norint atnaujinti vartotojo infomracija, reikia nurodyti bent viena reiksme',
+        })
+    }
+
+    if ('email' in payloadContent) {
+        return callback(400, {
+            msg: 'Email reiksmes keisti negalima',
+        })
+    }
+
+    let updatedValues = 0;
+
+    if ('pass' in payloadContent) {
+        const [passErr, passMsg] = IsValid.password(payloadContent.pass);
+        if (passErr) {
+            return callback(400, {
+                msg: passMsg,
+            })
+        }
+
+        const [hashErr, hashMsg] = utils.hash(payloadContent.pass);
+        if (hashErr) {
+            return callback(500, {
+                msg: 'Nepavyko atnaujinti vartotojo informacijos del vidines serverio klaidos',
+            })
+        }
+
+        userObj.hashedPassword = hashMsg;
+        updatedValues++;
+    }
+
+    for (const key of payloadKeys) {
+        if (key in userObj) {
+            userObj[key] = payloadContent[key];
+            updatedValues++;
+        }
+    }
+
+    if (updatedValues !== payloadKeys.length) {
+        return callback(400, {
+            msg: 'Tarp norimos atnaujinti informacijos yra neleistinu elementu, todel informacija nebuvo pakeista',
+        })
+    }
+
+    const [updateErr] = await file.update('accounts', email + '.json', userObj);
+    if (updateErr) {
+        return callback(500, {
+            msg: 'Vartotojo informacija neatnaujinta del vidines serverio klaidos',
+        })
+    }
+
     return callback(200, {
         msg: 'Vartotojo informacija sekmingai atnaujinta',
     })

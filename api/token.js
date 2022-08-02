@@ -104,7 +104,7 @@ handler._innerMethods.post = async (data, callback) => {
     ];
 
     return callback(200, {
-        msg: token.id,
+        msg: 'Sekmingas prisijungimas!',
     }, {
         'Set-Cookie': cookies.join('; '),
     })
@@ -129,6 +129,24 @@ handler._innerMethods.delete = async (data, callback) => {
     return callback(200, {
         msg: 'Token sekmingai istrintas',
     })
+}
+
+handler._innerMethods.verify = async (tokenStr) => {
+    if (typeof tokenStr !== 'string' || tokenStr === '') {
+        return false;
+    }
+
+    const [readErr, readMsg] = await file.read('tokens', tokenStr + '.json');
+    if (readErr) {
+        return false;
+    }
+
+    const [parseErr, parseMsg] = utils.parseJSONtoObject(readMsg);
+    if (parseErr) {
+        return false;
+    }
+
+    return parseMsg.sessionEnd >= Date.now();
 }
 
 export default handler;

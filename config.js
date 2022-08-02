@@ -5,7 +5,7 @@ environments.dev = {
     auth: {
         minPasswordLength: 4,
         verifyEmail: false,
-        sessionLength: 10,  // seconds
+        sessionLength: 600,  // seconds
     },
     db: {
         user: 'root',

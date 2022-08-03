@@ -6,7 +6,10 @@ environments.dev = {
     auth: {
         minPasswordLength: 4,
         verifyEmail: false,
-        sessionLength: 600,  // seconds
+        // sessionLength: 10,  // seconds
+        // hardSessionLimit: 30,  // seconds
+        sessionLength: 3600,  // seconds (1val)
+        hardSessionLimit: 36000,  // seconds (10val)
     },
     db: {
         user: 'root',
@@ -21,7 +24,8 @@ environments.test = {
     auth: {
         minPasswordLength: 8,
         verifyEmail: true,
-        sessionLength: 86400,  // seconds
+        sessionLength: 86400,  // seconds (1d)
+        hardSessionLimit: 604800,  // seconds (7d)
     },
     db: {
         user: 'root-test',
@@ -36,7 +40,8 @@ environments.prod = {
     auth: {
         minPasswordLength: 12,
         verifyEmail: true,
-        sessionLength: 31536000,  // seconds
+        sessionLength: 2592000,  // seconds (30d)
+        hardSessionLimit: 31536000,  // seconds (365d)
     },
     db: {
         user: 'root-prod',

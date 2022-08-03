@@ -84,6 +84,7 @@ handler._innerMethods.post = async (data, callback) => {
         id: utils.randomString(30),
         sessionStart: now,
         sessionEnd: now + config.auth.sessionLength * 1000,
+        hardSessionLimit: now + config.auth.hardSessionLimit * 1000,
     }
 
     const [createErr] = await file.create('tokens', token.id + '.json', token);
@@ -119,7 +120,20 @@ handler._innerMethods.get = async (data, callback) => {
 
 // PUT
 handler._innerMethods.put = async (data, callback) => {
-    console.log('PRATESINEJAME SESIJA....');
+    if (!data.user.isLoggedIn) {
+        return callback(400, {
+            msg: 'Token negali buti atnaujintas neprisijungusiam vartotojui',
+        })
+    }
+
+    const token = data.user.session.id;
+    data.user.session.sessionEnd = Date.now() + config.auth.sessionLength * 1000;
+    const [updateErr] = await file.update('tokens', token + '.json', data.user.session);
+    if (updateErr) {
+        return callback(500, {
+            msg: 'Nepavyko pratesti token galiojimo laiko',
+        })
+    }
 
     return callback(200, {
         msg: 'Token sekmingai atnaujintas',
@@ -135,20 +149,24 @@ handler._innerMethods.delete = async (data, callback) => {
 
 handler._innerMethods.verify = async (tokenStr) => {
     if (typeof tokenStr !== 'string' || tokenStr === '') {
-        return false;
+        return [false, {}];
     }
 
     const [readErr, readMsg] = await file.read('tokens', tokenStr + '.json');
     if (readErr) {
-        return false;
+        return [false, {}];
     }
 
     const [parseErr, parseMsg] = utils.parseJSONtoObject(readMsg);
     if (parseErr) {
-        return false;
+        return [false, {}];
     }
 
-    return parseMsg.sessionEnd >= Date.now();
+    if (parseMsg.sessionEnd < Date.now()) {
+        return [false, {}];
+    }
+
+    return [true, parseMsg];
 }
 
 export default handler;

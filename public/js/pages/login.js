@@ -1,4 +1,4 @@
-import { IsValid } from './components/IsValid.js';
+import { IsValid } from '../components/IsValid.js';
 
 const formDOM = document.querySelector('form');
 const notificationsDOM = document.querySelector('.notifications');
@@ -10,7 +10,6 @@ submitDOM.addEventListener('click', async (e) => {
 
     const email = inputsDOM[0].value;
     const pass = inputsDOM[1].value;
-    const repass = inputsDOM[2].value;
 
     const [emailErr, emailMsg] = IsValid.email(email);
     if (emailErr) {
@@ -22,15 +21,11 @@ submitDOM.addEventListener('click', async (e) => {
         return notificationsDOM.textContent = passMsg;
     }
 
-    if (pass !== repass) {
-        return notificationsDOM.textContent = 'Slaptazodziai turi sutapti';
-    }
-
     // surinkti duomenis
     const data = { email, pass };
 
     // juos issiusti i serverio API
-    const msgSend = await fetch('/api/account', {
+    const msgSend = await fetch('/api/token', {
         method: 'POST',
         body: JSON.stringify(data),
     })

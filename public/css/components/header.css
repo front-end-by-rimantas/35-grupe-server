@@ -1,0 +1,27 @@
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #ccc;
+}
+
+header > nav {
+    display: flex;
+    gap: 30px;
+}
+
+header > nav > a {
+    text-decoration: none;
+    color: #38f;
+    font-size: 20px;
+}
+
+header > nav > a:hover {
+    color: #02f;
+}
+
+header > nav > a.active {
+    color: #02f;
+    text-decoration: underline;
+}

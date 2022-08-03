@@ -8,7 +8,8 @@ header {
 
 header > nav {
     display: flex;
-    gap: 30px;
+    gap: 5px 30px;
+    flex-wrap: wrap;
 }
 
 header > nav > a {

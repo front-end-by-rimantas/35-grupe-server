@@ -119,6 +119,8 @@ handler._innerMethods.get = async (data, callback) => {
 
 // PUT
 handler._innerMethods.put = async (data, callback) => {
+    console.log('PRATESINEJAME SESIJA....');
+
     return callback(200, {
         msg: 'Token sekmingai atnaujintas',
     })

@@ -1,3 +1,4 @@
+import config from "../config.js";
 import { PageTemplate } from "../lib/PageTemplate.js";
 
 class pageRegister extends PageTemplate {
@@ -11,15 +12,15 @@ class pageRegister extends PageTemplate {
                     <div class="notifications"></div>
                     <div>
                         <label>Email</label>
-                        <input type="text">
+                        <input type="text" value="${config.envName === 'dev' ? 'petras@petras.lt' : ''}">
                     </div>
                     <div>
                         <label>Password</label>
-                        <input type="password">
+                        <input type="password" value="">
                     </div>
                     <div>
                         <label>Repeat password</label>
-                        <input type="password">
+                        <input type="password" value="">
                     </div>
                     <div>
                         <button type="submit">Register</button>

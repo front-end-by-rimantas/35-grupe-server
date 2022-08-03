@@ -1,6 +1,7 @@
 const environments = {};
 
 environments.dev = {
+    envName: 'dev',
     port: 65535,
     auth: {
         minPasswordLength: 4,
@@ -15,6 +16,7 @@ environments.dev = {
 }
 
 environments.test = {
+    envName: 'test',
     port: 7331,
     auth: {
         minPasswordLength: 8,
@@ -29,6 +31,7 @@ environments.test = {
 }
 
 environments.prod = {
+    envName: 'prod',
     port: 3000,
     auth: {
         minPasswordLength: 12,

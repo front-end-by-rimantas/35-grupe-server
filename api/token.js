@@ -142,8 +142,35 @@ handler._innerMethods.put = async (data, callback) => {
 
 // DELETE
 handler._innerMethods.delete = async (data, callback) => {
+    if (!data.user.isLoggedIn) {
+        return callback(200, {
+            msg: 'Token sekmingai istrintas',
+        })
+    }
+
+    const tokenID = data.user.session.id;
+
+    const [deleleErr] = await file.delete('tokens', tokenID + '.json');
+    if (deleleErr) {
+        return callback(500, {
+            msg: 'Nepavyko istrinti token del vidines serverio klaidos',
+        })
+    }
+
+    const cookies = [
+        'server-35-token=' + tokenID,
+        'path=/',
+        'domain=localhost',
+        'max-age=0',
+        // 'Secure',
+        'SameSite=Lax',
+        'HttpOnly',
+    ];
+
     return callback(200, {
         msg: 'Token sekmingai istrintas',
+    }, {
+        'Set-Cookie': cookies.join('; '),
     })
 }
 

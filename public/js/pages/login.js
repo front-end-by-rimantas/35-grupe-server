@@ -1,4 +1,5 @@
 import { IsValid } from '../components/IsValid.js';
+import { request } from '../components/request.js';
 
 const formDOM = document.querySelector('form');
 const notificationsDOM = document.querySelector('.notifications');
@@ -25,15 +26,7 @@ submitDOM.addEventListener('click', async (e) => {
     const data = { email, pass };
 
     // juos issiusti i serverio API
-    const msgSend = await fetch('/api/token', {
-        method: 'POST',
-        body: JSON.stringify(data),
-    })
-    const response = await msgSend.json();
-
-    notificationsDOM.textContent = response.msg;
-
-    // is serverio gausim atsakyma:
-    // - jei gerai - OK
-    // - jei NE gerai - klaidos pranesimas
+    await request('/api/token', 'POST', data, {
+        notificationsDOM,
+    });
 })

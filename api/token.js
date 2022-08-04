@@ -25,6 +25,7 @@ handler._innerMethods.post = async (data, callback) => {
     const [payloadErr, payloadContent] = payload;
     if (payloadErr) {
         return callback(400, {
+            type: 'msg',
             msg: 'Serveris gavo duomenis netinkamu formatu',
         })
     }
@@ -34,6 +35,7 @@ handler._innerMethods.post = async (data, callback) => {
     const [emailErr, emailMsg] = IsValid.email(email);
     if (emailErr) {
         return callback(400, {
+            type: 'msg',
             msg: emailMsg,
         })
     }
@@ -41,6 +43,7 @@ handler._innerMethods.post = async (data, callback) => {
     const [passErr, passMsg] = IsValid.password(pass);
     if (passErr) {
         return callback(400, {
+            type: 'msg',
             msg: passMsg,
         })
     }
@@ -48,6 +51,7 @@ handler._innerMethods.post = async (data, callback) => {
     const [readErr, readMsg] = await file.read('accounts', email + '.json');
     if (readErr) {
         return callback(400, {
+            type: 'msg',
             msg: 'Toks vartotojas neegzistuoja arba neteisinga email ir password kombinacija',
         })
     }
@@ -55,12 +59,14 @@ handler._innerMethods.post = async (data, callback) => {
     const [parseErr, userObj] = utils.parseJSONtoObject(readMsg);
     if (parseErr) {
         return callback(500, {
+            type: 'msg',
             msg: 'Vidine serverio klaida bandant nuskaityti vartotojo duomenis',
         })
     }
 
     if (userObj.isDeleted) {
         return callback(400, {
+            type: 'msg',
             msg: 'Toks vartotojas neegzistuoja arba neteisinga email ir password kombinacija',
         })
     }
@@ -68,12 +74,14 @@ handler._innerMethods.post = async (data, callback) => {
     const [hashErr, hashMsg] = utils.hash(pass);
     if (hashErr) {
         return callback(500, {
+            type: 'msg',
             msg: 'Vidine serverio klaida bandant prijungti vartotoja',
         })
     }
 
     if (hashMsg !== userObj.hashedPassword) {
         return callback(400, {
+            type: 'msg',
             msg: 'Toks vartotojas neegzistuoja arba neteisinga email ir password kombinacija',
         })
     }
@@ -90,6 +98,7 @@ handler._innerMethods.post = async (data, callback) => {
     const [createErr] = await file.create('tokens', token.id + '.json', token);
     if (createErr) {
         return callback(500, {
+            type: 'msg',
             msg: 'Nepavyko prisijungti del vidines serverio klaidos',
         })
     }
@@ -105,7 +114,8 @@ handler._innerMethods.post = async (data, callback) => {
     ];
 
     return callback(200, {
-        msg: 'Sekmingas prisijungimas!',
+        type: 'redirect',
+        href: '/',
     }, {
         'Set-Cookie': cookies.join('; '),
     })
@@ -114,6 +124,7 @@ handler._innerMethods.post = async (data, callback) => {
 // GET
 handler._innerMethods.get = async (data, callback) => {
     return callback(200, {
+        type: 'msg',
         msg: 'Visa token informacija',
     })
 }
@@ -122,6 +133,7 @@ handler._innerMethods.get = async (data, callback) => {
 handler._innerMethods.put = async (data, callback) => {
     if (!data.user.isLoggedIn) {
         return callback(400, {
+            type: 'msg',
             msg: 'Token negali buti atnaujintas neprisijungusiam vartotojui',
         })
     }
@@ -131,11 +143,13 @@ handler._innerMethods.put = async (data, callback) => {
     const [updateErr] = await file.update('tokens', token + '.json', data.user.session);
     if (updateErr) {
         return callback(500, {
+            type: 'msg',
             msg: 'Nepavyko pratesti token galiojimo laiko',
         })
     }
 
     return callback(200, {
+        type: 'msg',
         msg: 'Token sekmingai atnaujintas',
     })
 }
@@ -144,6 +158,7 @@ handler._innerMethods.put = async (data, callback) => {
 handler._innerMethods.delete = async (data, callback) => {
     if (!data.user.isLoggedIn) {
         return callback(200, {
+            type: 'msg',
             msg: 'Token sekmingai istrintas',
         })
     }
@@ -153,6 +168,7 @@ handler._innerMethods.delete = async (data, callback) => {
     const [deleleErr] = await file.delete('tokens', tokenID + '.json');
     if (deleleErr) {
         return callback(500, {
+            type: 'msg',
             msg: 'Nepavyko istrinti token del vidines serverio klaidos',
         })
     }
@@ -168,7 +184,8 @@ handler._innerMethods.delete = async (data, callback) => {
     ];
 
     return callback(200, {
-        msg: 'Token sekmingai istrintas',
+        type: 'redirect',
+        href: '/',
     }, {
         'Set-Cookie': cookies.join('; '),
     })
